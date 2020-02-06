@@ -3,11 +3,10 @@ GO := GO15VENDOREXPERIMENT=1 go
 NAME := gobackend
 OS := $(shell uname)
 MAIN_GO := main.go
-ROOT_PACKAGE := $(GIT_PROVIDER)/$(ORG)/$(NAME)
+ROOT_PACKAGE := $(GIT_PROVIDER)/kakumar/$(NAME)
 GO_VERSION := $(shell $(GO) version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 PACKAGE_DIRS := $(shell $(GO) list ./... | grep -v /vendor/)
 PKGS := $(shell go list ./... | grep -v /vendor | grep -v generated)
-PKGS := $(subst  :,_,$(PKGS))
 BUILDFLAGS := ''
 CGO_ENABLED = 0
 VENDOR_DIR=vendor
@@ -16,7 +15,6 @@ all: build
 
 check: fmt build test
 
-.PHONY: build
 build:
 	CGO_ENABLED=$(CGO_ENABLED) $(GO) build -ldflags $(BUILDFLAGS) -o bin/$(NAME) $(MAIN_GO)
 
@@ -62,8 +60,3 @@ lint: vendor | $(PKGS) $(GOLINT) # ❷
 	    test -z "$$($(GOLINT) $$pkg | tee /dev/stderr)" || ret=1 ; \
 	done ; exit $$ret
 
-watch:
-	reflex -r "\.go$" -R "vendor.*" make skaffold-run
-
-skaffold-run: build
-	skaffold run -p dev
